@@ -1,0 +1,421 @@
+# Node.js 工程开发规范
+
+## 项目结构规范
+
+### 目录结构
+```
+project-root/
+├── src/                    # 源代码目录
+│   ├── api/               # API接口相关
+│   ├── config/            # 配置文件
+│   ├── controllers/       # 控制器层
+│   ├── middleware/        # 中间件
+│   ├── models/            # 数据模型
+│   ├── routes/            # 路由定义
+│   ├── services/          # 业务逻辑层
+│   ├── utils/             # 工具函数
+│   └── index.js           # 入口文件
+├── test/                  # 测试文件
+├── docs/                  # 文档
+├── .github/               # GitHub相关配置
+├── .husky/                # Git钩子
+├── .vscode/               # VSCode配置
+├── node_modules/          # 依赖包
+├── package.json           # 项目配置
+├── .gitignore             # Git忽略文件
+├── .env                   # 环境变量
+├── .env.example           # 环境变量示例
+├── README.md              # 项目说明
+└── pnpm-lock.yaml         # 依赖锁文件
+```
+
+### 文件命名规范
+- 文件和目录名使用 `kebab-case` 格式（短横线连接）
+- 测试文件使用 `.test.js` 或 `.spec.js` 后缀
+- 配置文件使用 `.config.js` 后缀
+
+## 代码规范
+
+### 编码风格
+- 使用 ES6+ 语法
+- 使用 2 个空格缩进
+- 使用单引号字符串
+- 行末不使用分号（Prettier 自动处理）
+- 函数名使用驼峰命名法
+- 常量使用全大写加下划线命名
+
+### ESLint 配置
+```json
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended"
+  ],
+  "rules": {
+    "no-console": "warn",
+    "no-unused-vars": "error",
+    "prefer-const": "error",
+    "no-var": "error"
+  }
+}
+```
+
+### Prettier 配置
+```json
+{
+  "semi": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80
+}
+```
+
+## 依赖管理
+
+### 包管理器
+- 使用 pnpm 作为包管理器
+- 固定依赖版本，避免使用 ^ 或 ~ 前缀
+
+### 依赖分类
+- `dependencies`: 生产环境依赖
+- `devDependencies`: 开发环境依赖
+- `peerDependencies`: 对等依赖
+
+### 常用开发依赖
+```json
+{
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^2.8.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0",
+    "jest": "^29.0.0",
+    "nodemon": "^2.0.0"
+  }
+}
+```
+
+## 环境配置
+
+### 环境变量
+- 使用 `.env` 文件管理环境变量
+- 提供 `.env.example` 作为示例
+- 敏感信息不提交到版本控制
+
+### 环境区分
+- `development`: 开发环境
+- `test`: 测试环境
+- `staging`: 预发布环境
+- `production`: 生产环境
+
+## Git 规范
+
+### 分支命名
+- `main`: 主分支
+- `develop`: 开发分支
+- `feature/xxx`: 功能分支
+- `hotfix/xxx`: 热修复分支
+- `release/xxx`: 发布分支
+
+### 提交信息规范
+使用 Conventional Commits 规范：
+- `feat`: 新功能
+- `fix`: 修复bug
+- `docs`: 文档更新
+- `style`: 代码格式调整
+- `refactor`: 代码重构
+- `test`: 测试相关
+- `chore`: 构建过程或辅助工具的变动
+
+### 提交模板
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+## 开发流程
+
+### 开发前准备
+1. 克隆项目代码
+2. 安装依赖：`pnpm install`
+3. 复制环境变量：`cp .env.example .env`
+4. 启动开发服务器：`pnpm dev`
+
+### 代码提交流程
+1. 创建功能分支：`git checkout -b feature/xxx`
+2. 开发功能
+3. 运行测试：`pnpm test`
+4. 提交代码：`git commit -m "feat: xxx"`
+5. 推送到远程：`git push origin feature/xxx`
+6. 创建合并请求
+
+## 测试规范
+
+### 测试类型
+- 单元测试：测试单个函数或模块
+- 集成测试：测试模块间的交互
+- 端到端测试：测试完整流程
+
+### 测试覆盖率
+- 单元测试覆盖率不低于 80%
+- 关键业务逻辑必须 100% 覆盖
+
+### 测试工具
+- 使用 Jest 作为测试框架
+- 使用 Supertest 测试 HTTP 接口
+
+## 错误处理
+
+### 错误类型
+- 业务错误：用户操作不当导致的错误
+- 系统错误：程序异常或外部服务异常
+- 验证错误：输入数据不符合要求
+
+### 错误处理原则
+- 不要吞掉错误，应该记录并返回有意义的错误信息
+- 对外部服务调用添加超时和重试机制
+- 使用统一的错误处理中间件
+
+### 错误响应格式
+```json
+{
+  "success": false,
+  "code": "ERROR_CODE",
+  "message": "错误信息",
+  "data": null,
+  "timestamp": "2026-01-08T13:00:00.000Z"
+}
+```
+
+## 日志规范
+
+### 日志级别
+- `error`: 错误信息
+- `warn`: 警告信息
+- `info`: 一般信息
+- `debug`: 调试信息
+
+### 日志内容
+- 请求日志：记录所有HTTP请求
+- 错误日志：记录所有错误信息
+- 业务日志：记录关键业务操作
+- 性能日志：记录性能相关数据
+
+### 日志格式
+```
+[时间戳] [日志级别] [请求ID] [用户ID] 消息内容
+```
+
+## 性能优化
+
+### 代码层面
+- 避免阻塞操作，使用异步编程
+- 合理使用缓存
+- 避免内存泄漏
+
+### 数据库层面
+- 使用索引优化查询
+- 避免 N+1 查询问题
+- 合理使用连接池
+
+### 网络层面
+- 启用 Gzip 压缩
+- 使用 CDN 加速静态资源
+- 合理设置缓存头
+
+## 安全规范
+
+### 输入验证
+- 对所有用户输入进行验证和清理
+- 使用 Joi 或 Yup 等验证库
+- 防止 XSS 和 SQL 注入攻击
+
+### 认证授权
+- 使用 JWT 进行身份认证
+- 实现基于角色的访问控制（RBAC）
+- 敏感操作需要二次验证
+
+### 数据安全
+- 敏感数据加密存储
+- 传输数据使用 HTTPS
+- 定期备份重要数据
+
+## 部署规范
+
+### 容器化部署
+- 使用 Docker 容器化应用
+- 提供 Dockerfile 和 docker-compose.yml
+- 使用多阶段构建优化镜像大小
+
+### CI/CD 流程
+- 自动化测试
+- 代码质量检查
+- 自动部署到测试环境
+- 手动批准部署到生产环境
+
+### 监控告警
+- 应用性能监控（APM）
+- 错误日志监控
+- 系统资源监控
+- 业务指标监控
+
+## 文档规范
+
+### README 文档
+- 项目简介
+- 安装说明
+- 使用说明
+- API 文档
+- 贡献指南
+
+### API 文档
+- 使用 Swagger 或 OpenAPI 规范
+- 提供在线文档和离线文档
+- 包含请求示例和响应示例
+
+### 代码注释
+- 复杂函数添加注释
+- 公共 API 添加 JSDoc 注释
+- 关键业务逻辑添加注释
+
+## 版本管理
+
+### 语义化版本
+使用语义化版本号（Semantic Versioning）：
+- MAJOR：不兼容的 API 修改
+- MINOR：向下兼容的功能性新增
+- PATCH：向下兼容的问题修正
+
+### 发布流程
+1. 更新版本号
+2. 更新 CHANGELOG.md
+3. 创建 Git 标签
+4. 发布到 NPM（如果是库）
+
+## 性能指标
+
+### 响应时间
+- API 响应时间 < 200ms（P95）
+- 页面加载时间 < 3s
+
+### 可用性
+- 系统可用性 > 99.9%
+- 错误率 < 0.1%
+
+### 并发能力
+- 支持 1000+ 并发请求
+- 支持水平扩展
+
+## 代码审查
+
+### 审查内容
+- 代码风格和规范
+- 业务逻辑正确性
+- 性能优化
+- 安全性检查
+- 测试覆盖率
+
+### 审查流程
+1. 创建合并请求
+2. 自动代码检查
+3. 人工代码审查
+4. 合并代码
+
+## 技术栈推荐
+
+### 后端框架
+- Express.js：轻量级 Web 框架
+- Koa.js：下一代 Web 框架
+- NestJS：企业级 Node.js 框架
+
+### 数据库
+- MongoDB：文档数据库
+- PostgreSQL：关系型数据库
+- Redis：内存数据库
+
+### 工具库
+- Lodash：工具函数库
+- Axios：HTTP 客户端
+- Moment.js：日期处理库
+- Winston：日志库
+- Joi：数据验证库
+
+## 最佳实践
+
+### 代码组织
+- 按功能模块组织代码
+- 遵循单一职责原则
+- 使用依赖注入降低耦合度
+
+### 异步编程
+- 优先使用 async/await
+- 合理使用 Promise
+- 避免回调地狱
+
+### 错误处理
+- 使用 try/catch 处理异步错误
+- 提供友好的错误信息
+- 记录详细的错误日志
+
+### 性能优化
+- 使用连接池
+- 合理使用缓存
+- 避免同步阻塞操作
+
+### 安全性
+- 定期更新依赖
+- 使用安全头
+- 实施速率限制
+- 防止暴力破解
+
+## 工具推荐
+
+### 开发工具
+- VSCode：代码编辑器
+- Postman：API 测试工具
+- MongoDB Compass：数据库管理工具
+
+### 调试工具
+- Node.js Inspector：调试器
+- Chrome DevTools：前端调试
+- PM2：进程管理器
+
+### 监控工具
+- New Relic：应用性能监控
+- Sentry：错误追踪
+- Grafana：监控可视化
+
+## 常见问题
+
+### 内存泄漏
+- 检查事件监听器是否正确移除
+- 检查定时器是否正确清除
+- 检查闭包引用是否正确释放
+
+### 性能瓶颈
+- 使用性能分析工具定位瓶颈
+- 优化数据库查询
+- 使用缓存减少重复计算
+
+### 安全问题
+- 定期更新依赖包
+- 使用安全扫描工具
+- 实施安全编码规范
+
+## 参考资源
+
+### 官方文档
+- [Node.js 官方文档](https://nodejs.org/docs/)
+- [Express.js 官方文档](https://expressjs.com/)
+- [MongoDB 官方文档](https://docs.mongodb.com/)
+
+### 社区资源
+- [Node.js 最佳实践](https://github.com/goldbergyoni/nodebestpractices)
+- [Awesome Node.js](https://github.com/sindresorhus/awesome-nodejs)
+- [Node.js 中文社区](https://cnodejs.org/)
+
+---
