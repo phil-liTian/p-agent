@@ -1,3 +1,7 @@
+/*
+ * @Author: phil
+ * @Date: 2026-01-08 13:48:52
+ */
 /**
  * Node.js 项目入口文件
  * @author phil
@@ -41,7 +45,7 @@ app.use(errorHandler)
 
 // 启动服务器
 const PORT: number = parseInt((process.env.PORT as string) || '3000', 10)
-const HOST: string = (process.env.HOST as string) || 'localhost'
+const HOST: string = (process.env.HOST as string) || '0.0.0.0' || 'localhost'
 
 export const server: Server = app.listen(PORT, HOST, () => {
   console.log(`🚀 服务器启动成功！`)

@@ -55,6 +55,8 @@ pids/
 *.swp
 *.swo
 
+.husky
+
 # OS
 .DS_Store
 Thumbs.db
