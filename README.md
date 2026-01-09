@@ -22,6 +22,7 @@ project-root/
 │   └── index.js           # 入口文件
 ├── test/                  # 测试文件
 ├── docs/                  # 文档
+├── sql/                   # 数据库表创建和迁移脚本
 ├── .github/               # GitHub相关配置
 ├── .husky/                # Git钩子
 ├── .vscode/               # VSCode配置

@@ -15,7 +15,7 @@ const router: Router = Router()
  * @param req - Express请求对象
  * @param res - Express响应对象
  */
-router.get('/', (_req: Request, res: Response) => {
+router.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: '服务运行正常',

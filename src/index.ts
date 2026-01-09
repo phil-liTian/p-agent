@@ -20,6 +20,7 @@ dotenv.config()
 import { rootRouter } from './routes/index'
 import { healthRouter } from './routes/health'
 import chatRouter from './routes/chat'
+import userRouter from './routes/user'
 
 // 导入中间件
 import { errorHandler, notFoundHandler } from './middleware/error-handler'
@@ -34,8 +35,9 @@ app.use(express.urlencoded({ extended: true }))
 
 // 路由配置
 app.use('/', rootRouter)
-app.use('/health', healthRouter)
+app.use('/', healthRouter)
 app.use('/', chatRouter)
+app.use('/', userRouter)
 
 // 404 处理中间件 - 必须在所有路由之后
 app.use(notFoundHandler)
