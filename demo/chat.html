@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P-Agent 聊天机器人演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+    }
+
+    .chat-history {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #fafafa;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 70%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-message {
+      background-color: #667eea;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot-message {
+      background-color: #e9ecef;
+      color: #333;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-info {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    .input-container {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid #eee;
+      background-color: white;
+    }
+
+    .message-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      outline: none;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .message-input:focus {
+      border-color: #667eea;
+    }
+
+    .send-button {
+      margin-left: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+
+    .send-button:hover {
+      transform: scale(1.05);
+    }
+
+    .send-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 10px 15px;
+      background-color: #e9ecef;
+      color: #333;
+      margin-right: auto;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      margin-bottom: 15px;
+    }
+
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #667eea;
+      margin: 0 2px;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% {
+        transform: scale(0);
+      }
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .status {
+      padding: 10px 15px;
+      text-align: center;
+      font-size: 14px;
+      background-color: #f8f9fa;
+      border-top: 1px solid #eee;
+    }
+
+    .status.success {
+      color: #28a745;
+    }
+
+    .status.error {
+      color: #dc3545;
+    }
+
+    .status.warning {
+      color: #ffc107;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        border-radius: 0;
+      }
+      
+      .message {
+        max-width: 85%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Chat - boot</h1>
+      <p>基于知识库的 AI 助手演示</p>
+    </div>
+    
+    <div class="chat-container">
+      <div class="chat-history" id="chatHistory">
+        <!-- 消息将在这里显示 -->
+        <div class="message bot-message">
+          你好！我是phil的聊天机器人。我可以根据知识库回答你的问题。请问有什么可以帮助你的？
+        </div>
+      </div>
+      
+      <div class="typing-indicator" id="typingIndicator">
+        机器人正在输入<span></span><span></span><span></span>
+      </div>
+      
+      <div class="input-container">
+        <input 
+          type="text" 
+          class="message-input" 
+          id="messageInput" 
+          placeholder="输入你的消息..."
+          autocomplete="off"
+        >
+        <button class="send-button" id="sendButton">发送</button>
+      </div>
+      
+      <div class="status" id="status">
+        服务状态：准备就绪
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 获取 DOM 元素
+    const chatHistory = document.getElementById('chatHistory');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const status = document.getElementById('status');
+    
+    // 当前对话历史
+    let conversationHistory = [];
+    
+    // 发送消息函数
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      
+      if (!message) return;
+      
+      // 清空输入框
+      messageInput.value = '';
+      
+      // 添加用户消息到聊天历史
+      addMessage(message, 'user');
+      
+      // 显示打字指示器
+      showTypingIndicator();
+      
+      // 禁用发送按钮
+      sendButton.disabled = true;
+      
+      try {
+        // 发送请求到 /chat 接口
+        const response = await fetch('http://localhost:3000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
+        
+        const data = await response.json();
+        
+        // 隐藏打字指示器
+        hideTypingIndicator();
+        
+        if (data.success) {
+          // 添加机器人回复到聊天历史
+          addMessage(data.data.message, 'bot');
+          updateStatus('消息发送成功', 'success');
+        } else {
+          // 显示错误信息
+          addMessage(`抱歉，处理消息时出错：${data.message}`, 'bot');
+          updateStatus(`错误：${data.message}`, 'error');
+        }
+      } catch (error) {
+        // 隐藏打字指示器
+        hideTypingIndicator();
+        
+        // 显示网络错误
+        addMessage('抱歉，网络连接出现问题，请检查网络后重试。', 'bot');
+        updateStatus('网络连接错误', 'error');
+        console.error('Error sending message:', error);
+      } finally {
+        // 启用发送按钮
+        sendButton.disabled = false;
+        messageInput.focus();
+      }
+    }
+    
+    // 添加消息到聊天历史
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      messageDiv.textContent = text;
+      
+      // 添加时间戳
+      const timestamp = document.createElement('div');
+      timestamp.className = 'message-info';
+      timestamp.textContent = new Date().toLocaleTimeString();
+      console.log('messageDiv', messageDiv);
+      
+      
+      messageDiv.appendChild(timestamp);
+      chatHistory.appendChild(messageDiv);
+      
+      // 滚动到底部
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+      
+      // 保存到对话历史
+      conversationHistory.push({
+        sender,
+        text,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // 显示打字指示器
+    function showTypingIndicator() {
+      typingIndicator.style.display = 'block';
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+    
+    // 隐藏打字指示器
+    function hideTypingIndicator() {
+      typingIndicator.style.display = 'none';
+    }
+    
+    // 更新状态栏
+    function updateStatus(text, type = '') {
+      status.textContent = text;
+      status.className = 'status';
+      if (type) {
+        status.classList.add(type);
+      }
+    }
+    
+    // 绑定事件监听器
+    sendButton.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+    
+    // 初始化
+    messageInput.focus();
+    
+    // 加载对话历史
+    async function loadChatHistory() {
+      try {
+        const response = await fetch('http://localhost:3000/chat/history');
+        const data = await response.json();
+        
+        if (data.success && data.data && data.data.length > 0) {
+          // 清空当前聊天历史
+          chatHistory.innerHTML = '';
+          
+          // 添加历史消息
+          data.data.forEach(item => {
+            addMessage(item.content, item.role === 'user' ? 'user' : 'bot');
+          });
+          
+          updateStatus('已加载历史对话', 'success');
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        updateStatus('无法加载历史对话', 'warning');
+      }
+    }
+    
+    // 页面加载时尝试加载历史对话
+    loadChatHistory();
+  </script>
+</body>
+</html>
